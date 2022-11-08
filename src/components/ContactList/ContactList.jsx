@@ -1,33 +1,40 @@
+import React from 'react';
+import { useMemo, useState } from 'react';
+import {
+  useGetContactsQuery,
+  useDeleteContactMutation,
+} from '../../Redux/contactsApi';
 import { List, Item, Button } from "./ContactList.styled";
-import { useDispatch, useSelector } from "react-redux";
-import {deleteContact} from '../../Redux/contactSlice'
+import { Filter } from '../Filter/Filter';
 
 const ContactList = () => {
+  const { data } = useGetContactsQuery();
+  const [filter, setFilter] = useState('');
+  const [deleteContact] = useDeleteContactMutation();
 
-   
-    const contacts = useSelector(state => state.contacts.items);    
-    const filter = useSelector(state => state.filter.value);    
+  const filteredContacts = useMemo(() => {
+    return (
+      data?.filter(contact =>
+        contact.name.toLocaleLowerCase().includes(filter.toLowerCase())
+      ) ?? []
+    );
+  }, [filter, data]);
 
-    const getFilteredContacts = () => {                                               
-        const normalizedFilter = filter.toLowerCase();
-        return contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter));
-      };
-      const filteredContacts = getFilteredContacts();
+  const contactList = filter.length ? filteredContacts : data;
 
-    const dispatch = useDispatch();
-
-    const delContact = (id) => {
-        dispatch(deleteContact(id));
-      };
-
-    return ( 
-        <List>
-            {filteredContacts.map(val => (<Item key={val.id}>{val.name}: {val.number}
-                <Button onClick={()=> delContact(val.id) }>Delete</Button>
-            </Item>))}
-        </List>
-    )
-
+  return (
+    <>
+      <Filter value={filter} onFilter={setFilter} />
+      <List>
+        {contactList &&
+          contactList?.map(({ id, name, number }) => (
+            <Item key={id}>
+              {name}: {number}
+              <Button onClick={() => deleteContact(id)}>Delete</Button>
+            </Item>
+          ))}
+      </List>
+    </>
+  );
 };
-
 export default ContactList;

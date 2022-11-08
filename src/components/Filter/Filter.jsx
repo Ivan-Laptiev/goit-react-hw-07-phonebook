@@ -1,25 +1,15 @@
-import {Label } from "../ContactForm/ContactForm.styled";
+import React from 'react';
 import { Container, InputName } from "./Filter.styled";
-import { useDispatch, useSelector } from "react-redux";
-import {setFilter} from '../../Redux/filterSlice'
 
-const Filter = () => {
-    const dispatch = useDispatch();
-    const value = useSelector(state => state.filter.value);
-    
-
-    const handleFilter = e => {
-        dispatch(setFilter(e.target.value));
-      };
-
-     return (
+export const Filter = ({ value, onFilter }) => {
+  return (
     <Container>
-        <Label>
-            Find contacts by name
-            <InputName type="text" value={value} onChange={handleFilter} />
-        </Label>
+      Find contacts by name
+      <InputName
+        type="text"
+        value={value}
+        onChange={e => onFilter(e.currentTarget.value)}
+      />
     </Container>
-)}
-
-
-export default Filter;
+  );
+};
